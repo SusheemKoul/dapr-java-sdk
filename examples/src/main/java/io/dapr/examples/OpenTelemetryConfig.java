@@ -17,6 +17,7 @@ import io.dapr.examples.invoke.http.InvokeClient;
 import io.opentelemetry.api.GlobalOpenTelemetry;
 import io.opentelemetry.api.OpenTelemetry;
 import io.opentelemetry.api.trace.Tracer;
+import io.opentelemetry.api.trace.TracerProvider;
 import io.opentelemetry.api.trace.propagation.W3CTraceContextPropagator;
 import io.opentelemetry.context.Context;
 import io.opentelemetry.context.propagation.ContextPropagators;
@@ -80,9 +81,18 @@ public class OpenTelemetryConfig {
           .buildAndRegisterGlobal();
     } else {
       System.out.println("WARNING: Zipkin is not available.");
-    }
+      return new OpenTelemetry() {
+        @Override
+        public TracerProvider getTracerProvider() {
+          return TracerProvider.getDefault();
+        }
 
-    return null;
+        @Override
+        public ContextPropagators getPropagators() {
+          return ContextPropagators.noop();
+        }
+      };
+    }
   }
 
   /**
